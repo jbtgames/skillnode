@@ -28,6 +28,30 @@ export const App = (() => {
 
   function init(){
     try {
+      // REGION: Theme setup
+      const THEME_KEY = 'theme';
+      const lightVars = {
+        '--bg': '#f6f8fb', '--panel': '#ffffff', '--text': '#111827', '--muted': '#6b7280',
+        '--accent': '#2563eb', '--accent-2': '#059669', '--border': '#e5e7eb'
+      };
+      const applyTheme = (mode) => {
+        const root = document.documentElement; const isLight = mode === 'light';
+        for (const [k, v] of Object.entries(lightVars)) root.style.setProperty(k, isLight ? v : '');
+        document.body.classList.toggle('theme-light', isLight);
+        document.body.classList.toggle('theme-dark', !isLight);
+        try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch {}
+      };
+      const ensureTransitionCSS = () => {
+        if (document.getElementById('sn-theme-trans')) return;
+        const s = document.createElement('style'); s.id = 'sn-theme-trans';
+        s.textContent = `
+          body, #app-header, #app-sidebar, #app-canvas, #app-progress, #app-footer,
+          .goal-button, .node, .link { transition: background-color .2s ease, color .2s ease, border-color .2s ease, fill .2s ease, stroke .2s ease; }
+        `; document.head.appendChild(s);
+      };
+      ensureTransitionCSS();
+      const saved = (()=>{ try { return localStorage.getItem(THEME_KEY); } catch { return null; } })();
+      applyTheme(saved === 'light' ? 'light' : 'dark');
       ensureContainers();
       renderPlaceholders();
       // REGION: Graph bootstrap (lazy-load D3 graph)
@@ -55,6 +79,15 @@ export const App = (() => {
     // REGION: Goal input → generate roadmap
     const headerEl = document.getElementById('app-header');
     if (headerEl) {
+      // Theme toggle button
+      const modeNow = document.body.classList.contains('theme-light') ? 'light' : 'dark';
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'goal-button';
+      toggle.setAttribute('aria-pressed', String(modeNow === 'light'));
+      const updateLabel = (m) => { toggle.textContent = m === 'light' ? 'Dark Mode' : 'Light Mode'; };
+      updateLabel(modeNow);
+
       const form = document.createElement('form');
       form.setAttribute('aria-label', 'Generate roadmap');
       const input = document.createElement('input');
@@ -67,8 +100,26 @@ export const App = (() => {
       btn.type = 'submit';
       btn.textContent = 'Generate';
       btn.className = 'goal-button';
+      const actions = document.createElement('div');
+      actions.style.display = 'flex'; actions.style.gap = '8px'; actions.style.flexWrap = 'wrap';
+      actions.append(toggle, form);
       form.append(input, btn);
-      headerEl.appendChild(form);
+      headerEl.appendChild(actions);
+
+      toggle.addEventListener('click', () => {
+        const to = document.body.classList.contains('theme-light') ? 'dark' : 'light';
+        updateLabel(to); const THEME_KEY = 'theme';
+        const lightVars = {
+          '--bg': '#f6f8fb', '--panel': '#ffffff', '--text': '#111827', '--muted': '#6b7280',
+          '--accent': '#2563eb', '--accent-2': '#059669', '--border': '#e5e7eb'
+        };
+        const root = document.documentElement; const isLight = to === 'light';
+        for (const [k, v] of Object.entries(lightVars)) root.style.setProperty(k, isLight ? v : '');
+        document.body.classList.toggle('theme-light', isLight);
+        document.body.classList.toggle('theme-dark', !isLight);
+        try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch {}
+        toggle.setAttribute('aria-pressed', String(isLight));
+      });
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();

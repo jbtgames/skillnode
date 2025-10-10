@@ -63,10 +63,16 @@ export default {
       return json({ error: 'Server not configured' }, 500, CORS);
     }
 
-    let goal = '';
-    try { const b = await request.json(); goal = (b?.goal || '').trim(); } catch {}
+    let goal = '', recommendationsFor = '';
+    try {
+      const b = await request.json();
+      goal = (b?.goal || '').trim();
+      recommendationsFor = (b?.recommendationsFor || '').trim();
+    } catch {}
+    if (recommendationsFor) {
+      return handleRecommendations(recommendationsFor, env, CORS);
+    }
     if (!goal) return json({ error: 'Missing goal' }, 400, CORS);
-
     return handleRoadmap(goal, env, CORS);
   }
 }
@@ -105,5 +111,37 @@ async function handleRoadmap(goal, env, CORS) {
     return json(parsed, 200, CORS);
   } catch (e) {
     return json({ error: 'Request failed' }, 500, CORS);
+  }
+}
+
+async function handleRecommendations(label, env, CORS) {
+  const url = 'https://api.groq.com/openai/v1/chat/completions';
+  const payload = {
+    model: 'mixtral-8x7b-32768',
+    messages: [
+      { role: 'system', content: 'Output JSON array only.' },
+      { role: 'user', content: `Suggest 5 advanced or related skills to ${label}, return JSON array of strings.` }
+    ],
+    temperature: 0,
+    max_tokens: 256
+  };
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const text = await r.text();
+    if (!r.ok) return json({ error: 'Upstream error', status: r.status, body: text }, r.status, CORS);
+    let out = [];
+    try { const data = JSON.parse(text); out = toJson(data?.choices?.[0]?.message?.content || '') || []; }
+    catch {}
+    if (!Array.isArray(out)) out = [];
+    return json(out, 200, CORS);
+  } catch {
+    return json([], 200, CORS);
   }
 }

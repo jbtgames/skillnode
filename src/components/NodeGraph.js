@@ -29,6 +29,56 @@ export function mountGraph(el, dataset) {
   const linkG = g.append('g').attr('class', 'links');
   const nodeG = g.append('g').attr('class', 'nodes');
 
+  // Export state and controls
+  let exportData = null;
+  const getExportData = () => exportData || { nodes: [], links: [] };
+  const controls = d3.select(el)
+    .append('div')
+    .attr('class', 'export-controls')
+    .style('display', 'flex')
+    .style('gap', 'var(--space-2)')
+    .style('margin-top', 'var(--space-2)');
+
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
+
+  const exportJSON = () => {
+    const data = getExportData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    downloadBlob(blob, 'skillnode_roadmap.json');
+  };
+
+  const exportPNG = () => {
+    const svgEl = svg.node(); if (!svgEl) return;
+    const serializer = new XMLSerializer();
+    let src = serializer.serializeToString(svgEl);
+    if (!src.match(/xmlns=\"http:\/\/www.w3.org\/2000\/svg\"/)) src = src.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    if (!src.match(/xmlns:xlink/)) src = src.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+    const svgBlob = new Blob([src], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.floor(width));
+      canvas.height = Math.max(1, Math.floor(height));
+      const ctx = canvas.getContext('2d');
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0e0f12';
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob((blob) => { if (blob) downloadBlob(blob, 'skillnode_roadmap.png'); }, 'image/png');
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
+  };
+
+  controls.append('button').attr('type','button').attr('class','goal-button').text('Export JSON').on('click', exportJSON);
+  controls.append('button').attr('type','button').attr('class','goal-button').text('Export Image').on('click', exportPNG);
+
   let currentTransform = d3.zoomIdentity;
   svg.call(
     d3.zoom().scaleExtent([0.5, 4]).on('zoom', (ev) => {
@@ -139,6 +189,8 @@ export function mountGraph(el, dataset) {
       .on('click', (ev, d) => {
         node.classed('is-selected', false).attr('stroke-width', 2);
         d3.select(ev.currentTarget).classed('is-selected', true).attr('stroke-width', 3);
+        // Show details modal
+        try { showNodeModal(d); } catch {}
         if (window.AppBus && typeof window.AppBus.emit === 'function') {
           const ids = Array.from(neighbor.get(d.id) || []);
           const labels = ids.map((id) => byId.get(id)?.label ?? String(id));
@@ -172,6 +224,13 @@ export function mountGraph(el, dataset) {
     // Resolve neighbor map after link force initializes source/target
     buildNeighbors();
 
+    // Prepare export snapshot (ids, labels only)
+    const buildExport = () => ({
+      nodes: nodes.map((n) => ({ id: n.id, label: n.label, group: n.group, difficulty: n.difficulty, status: n.status })),
+      links: links.map((l) => ({ source: nodeKey(l.source), target: nodeKey(l.target), type: l.type || 'related' }))
+    });
+    exportData = buildExport();
+
     sim.on('tick', () => {
       link
         .attr('x1', (d) => d.source.x)
@@ -198,4 +257,117 @@ export function mountGraph(el, dataset) {
   };
 
   run();
+}
+
+// REGION: Modal helper (appends to document.body)
+function showNodeModal(node) {
+  const body = document.body;
+  const old = document.getElementById('sn-modal-overlay');
+  if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'sn-modal-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.background = 'rgba(0,0,0,0.5)';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.zIndex = '10000';
+
+  const panel = document.createElement('div');
+  panel.role = 'dialog';
+  panel.setAttribute('aria-modal', 'true');
+  panel.style.minWidth = 'min(640px, 92vw)';
+  panel.style.maxWidth = '92vw';
+  panel.style.background = 'var(--panel)';
+  panel.style.color = 'var(--text)';
+  panel.style.border = '1px solid var(--border)';
+  panel.style.borderRadius = '12px';
+  panel.style.boxShadow = '0 10px 30px rgba(0,0,0,.35)';
+  panel.style.padding = '16px';
+  panel.style.position = 'relative';
+
+  const close = document.createElement('button');
+  close.setAttribute('aria-label', 'Close');
+  close.textContent = '×';
+  close.style.position = 'absolute';
+  close.style.top = '8px';
+  close.style.right = '12px';
+  close.style.border = '0';
+  close.style.background = 'transparent';
+  close.style.color = 'var(--text)';
+  close.style.fontSize = '20px';
+  close.style.cursor = 'pointer';
+
+  const h = document.createElement('h3');
+  h.textContent = node.label || node.id || 'Node';
+  h.style.margin = '0 24px 8px 0';
+  h.style.color = 'var(--accent)';
+
+  const dl = document.createElement('dl');
+  const addRow = (k, v) => {
+    const dt = document.createElement('dt'); dt.textContent = k; dt.style.color = 'var(--muted)'; dt.style.fontWeight = '600';
+    const dd = document.createElement('dd'); dd.textContent = String(v ?? '-'); dd.style.margin = '0 0 8px 0';
+    dl.append(dt, dd);
+  };
+  addRow('Group', node.group ?? '-');
+  addRow('Difficulty', Number.isFinite(+node.difficulty) ? `Level ${+node.difficulty}` : (node.difficulty ?? '-'));
+
+  const statusWrap = document.createElement('div');
+  const badge = document.createElement('span');
+  const status = node.status || 'incomplete';
+  badge.className = `status-badge status-${status}`;
+  badge.textContent = String(status).replace('_',' ');
+  statusWrap.appendChild(badge);
+
+  const dt = document.createElement('dt'); dt.textContent = 'Status'; dt.style.color = 'var(--muted)'; dt.style.fontWeight = '600';
+  const dd = document.createElement('dd'); dd.style.margin = '0 0 8px 0'; dd.appendChild(badge);
+  dl.append(dt, dd);
+
+  // Optional summary
+  if (node.summary) {
+    const sumH = document.createElement('h4'); sumH.textContent = 'Summary'; sumH.style.margin = '12px 0 6px';
+    const sumP = document.createElement('p'); sumP.textContent = String(node.summary);
+    panel.append(sumH, sumP);
+  }
+
+  panel.append(close, h, dl);
+  // Related skills (async)
+  const rel = document.createElement('section');
+  rel.setAttribute('aria-label', 'Related Skills');
+  const relH = document.createElement('h4'); relH.textContent = 'Related Skills';
+  const relStatus = document.createElement('p'); relStatus.textContent = 'Loading...';
+  rel.append(relH, relStatus);
+  panel.appendChild(rel);
+
+  (async () => {
+    try {
+      const mod = await import('../logic/recommendations.js');
+      const name = String(node.label || node.id || '');
+      const list = await mod.getSkillRecommendations(name);
+      if (relStatus.isConnected) relStatus.remove();
+      if (Array.isArray(list) && list.length) {
+        const ul = document.createElement('ul');
+        for (const s of list.slice(0, 5)) {
+          const li = document.createElement('li'); li.textContent = String(s);
+          ul.appendChild(li);
+        }
+        rel.appendChild(ul);
+      } else {
+        const none = document.createElement('p'); none.textContent = 'No recommendations available';
+        rel.appendChild(none);
+      }
+    } catch {
+      if (relStatus.isConnected) relStatus.remove();
+      const none = document.createElement('p'); none.textContent = 'No recommendations available';
+      rel.appendChild(none);
+    }
+  })();
+  overlay.appendChild(panel);
+  body.appendChild(overlay);
+
+  const cleanup = () => overlay.remove();
+  close.addEventListener('click', cleanup);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(); });
 }
