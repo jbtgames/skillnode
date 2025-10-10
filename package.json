@@ -4,5 +4,13 @@
   "version": "0.1.0",
   "engines": {
     "node": "20.x"
+  },
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'Static build complete'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "d3": "^7"
   }
 }

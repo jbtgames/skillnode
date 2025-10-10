@@ -27,24 +27,30 @@ export const App = (() => {
   }
 
   function init(){
-    ensureContainers();
-    renderPlaceholders();
-    // REGION: Graph bootstrap
-    const host = document.getElementById("app-canvas");
-    if (host) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'graph-container';
-      while (host.firstChild) wrapper.appendChild(host.firstChild);
-      host.appendChild(wrapper);
-      try { mountGraph(wrapper); } catch (e) { console.error(e); }
-    }
+    try {
+      ensureContainers();
+      renderPlaceholders();
+      // REGION: Graph bootstrap (lazy-load D3 graph)
+      const host = document.getElementById("app-canvas");
+      if (host) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'graph-container';
+        while (host.firstChild) wrapper.appendChild(host.firstChild);
+        host.appendChild(wrapper);
+        const loadGraph = (() => { let p; return () => (p ||= import('./components/NodeGraph.js')); })();
+        requestAnimationFrame(() => {
+          loadGraph().then(mod => { try { mod.mountGraph(wrapper); } catch {} }).catch(() => {});
+        });
+      }
 
-    if (window.AppBus && typeof window.AppBus.on === 'function') {
-      window.AppBus.on('node:selected', (d) => {
-        const sidebar = document.getElementById('app-sidebar');
-        if (sidebar) renderSidebar(sidebar, d);
-      });
-    }
+      if (window.AppBus && typeof window.AppBus.on === 'function') {
+        window.AppBus.on('node:selected', async (d) => {
+          const sidebar = document.getElementById('app-sidebar');
+          if (!sidebar) return;
+          try { const { renderSidebar } = await import('./components/Sidebar.js'); renderSidebar(sidebar, d); } catch {}
+        });
+      }
+    } catch {}
 
     // REGION: Goal input → generate roadmap
     const headerEl = document.getElementById('app-header');
@@ -129,7 +135,11 @@ export const App = (() => {
           input.disabled = false; btn.disabled = false;
         }
 
-        try { mountGraph(wrapper, data); } catch (err) { console.error(err); }
+        // Lazy-load graph module and render on next frame
+        const loadGraph = (() => { let p; return () => (p ||= import('./components/NodeGraph.js')); })();
+        requestAnimationFrame(() => {
+          loadGraph().then(mod => { try { mod.mountGraph(wrapper, data); } catch {} }).catch(() => {});
+        });
         if (window.AppBus?.emit) window.AppBus.emit('roadmap:loaded', { goal, count: data?.nodes?.length || 0 });
       });
     }
@@ -149,6 +159,4 @@ export const App = (() => {
 })();
 
 document.addEventListener("DOMContentLoaded", () => App.init());
-import { mountGraph } from "./components/NodeGraph.js";
-import { renderSidebar } from "./components/Sidebar.js";
 import { requestRoadmap } from './logic/aiIntegration.js';

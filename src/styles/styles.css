@@ -70,3 +70,35 @@ a:focus,button:focus,[role="button"]:focus,[tabindex]:focus{
 .goal-input { width:100%; padding:10px; border-radius:var(--radius); border:1px solid var(--border); background:var(--panel); color:var(--text); margin-bottom:12px; }
 .goal-button { display:inline-block; padding:8px 14px; border-radius:var(--radius); background:var(--accent); color:#000; font-weight:bold; cursor:pointer; }
 .goal-button:hover { background:var(--accent-2); }
+
+/* --- Production UI Enhancements (append-only) --- */
+/* Typography */
+body { line-height: 1.65; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+h1, h2, h3, h4 { line-height: 1.25; letter-spacing: 0.2px; margin-top: var(--space-3); margin-bottom: var(--space-2); }
+h1 { margin-bottom: var(--space-3); }
+p { margin: 0 0 var(--space-3); }
+small { color: var(--muted); }
+
+/* Links & buttons interactions */
+a { transition: color .15s ease, text-decoration-color .15s ease; }
+a:hover, a:focus { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+.goal-button, button { transition: background-color .2s ease, color .2s ease, transform .06s ease; }
+.goal-button:active, button:active { transform: scale(0.98); }
+.goal-button:disabled, button:disabled { opacity: .6; cursor: default; }
+
+/* Contrast refinements for dark mode */
+#app-header, #app-sidebar, #app-canvas, #app-progress, #app-footer { color: var(--text); }
+.divider { background: color-mix(in srgb, var(--border) 90%, black); }
+
+/* Graph container responsiveness */
+.graph-container { contain: layout paint; }
+.graph-root { height: clamp(320px, 50vh, 520px); transition: height .2s ease; }
+
+/* Mobile refinements */
+@media (max-width: 767.98px) {
+  body { font-size: 15px; line-height: 1.7; }
+  .container { padding-inline: var(--space-3); }
+  .layout { gap: var(--space-2); padding: var(--space-3); }
+  #app-header, #app-sidebar, #app-canvas, #app-progress, #app-footer { padding: var(--space-2); }
+  .graph-root { height: clamp(260px, 46vh, 420px); }
+}
