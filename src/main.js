@@ -82,24 +82,51 @@ export const App = (() => {
 
         while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild);
 
+        // Loading state
+        const loading = document.createElement('p');
+        loading.textContent = 'Generating roadmap…';
+        loading.setAttribute('aria-live', 'polite');
+        wrapper.appendChild(loading);
+        input.disabled = true; btn.disabled = true;
+
         let data;
         try {
           data = await requestRoadmap(goal);
-          if (data && Array.isArray(data.nodes)) {
-            data.nodes = data.nodes.map((n, i) => ({
-              id: n.id ?? n.slug ?? String(n.name ?? n.label ?? i),
-              label: n.label ?? n.name ?? String(n.id ?? `Node ${i+1}`),
-              group: (n.group != null && n.group !== '') ? n.group : '-',
-              difficulty: Number.isFinite(+n.difficulty) ? +n.difficulty : 1,
-              status: n.status ?? 'incomplete'
-            }));
-          }
+          // Normalize nodes
+          const nodes = Array.isArray(data?.nodes) ? data.nodes.map((n, i) => ({
+            id: n.id ?? n.slug ?? String(n.name ?? n.label ?? i),
+            label: n.label ?? n.name ?? String(n.id ?? `Node ${i+1}`),
+            group: (n.group != null && n.group !== '') ? n.group : '-',
+            difficulty: Number.isFinite(+n.difficulty) ? +n.difficulty : 1,
+            status: n.status ?? 'incomplete'
+          })) : [];
+          const byIndexId = (idx) => (nodes[idx]?.id ?? String(idx));
+          const toId = (ref) => {
+            if (ref && typeof ref === 'object') return ref.id ?? ref.slug ?? String(ref.name ?? '');
+            if (typeof ref === 'number') return byIndexId(ref);
+            if (typeof ref === 'string' && /^\d+$/.test(ref)) return byIndexId(+ref);
+            return String(ref ?? '');
+          };
+          // Normalize links to id->id
+          const rawLinks = Array.isArray(data?.links) ? data.links : (Array.isArray(data?.edges) ? data.edges : []);
+          const links = rawLinks.map((l) => ({
+            source: toId(l.source ?? l.from),
+            target: toId(l.target ?? l.to),
+            type: l.type ?? 'related'
+          }));
+          data = { nodes, links };
         } catch (err) {
+          loading.remove();
+          input.disabled = false; btn.disabled = false;
           const msg = document.createElement('p');
           msg.style.color = 'var(--muted)';
           msg.textContent = 'Unable to generate roadmap.';
           wrapper.appendChild(msg);
           return;
+        } finally {
+          // Clear loading
+          if (loading.isConnected) loading.remove();
+          input.disabled = false; btn.disabled = false;
         }
 
         try { mountGraph(wrapper, data); } catch (err) { console.error(err); }
