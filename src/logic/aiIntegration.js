@@ -11,7 +11,12 @@ const toJson = (s) => {
 };
 
 export async function requestRoadmap(goal) {
-  const endpoint = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_ROADMAP_API_URL) || '/api/roadmap';
+  const inferred = (typeof location !== 'undefined' && /github\.io$/i.test(location.hostname))
+    ? 'https://curly-bird-87ae.thejamiebt.workers.dev'
+    : '/api/roadmap';
+  const endpoint = (typeof window !== 'undefined' && window.SKILLNODE_API_URL)
+    || ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_ROADMAP_API_URL) ? import.meta.env.VITE_ROADMAP_API_URL : null)
+    || inferred;
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
