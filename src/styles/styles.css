@@ -55,3 +55,13 @@ a:focus,button:focus,[role="button"]:focus,[tabindex]:focus{
 .node.is-hovered { stroke: var(--accent); stroke-width: 2; }
 .node.is-selected { stroke: var(--accent-2); stroke-width: 2.5; }
 .tooltip { position:absolute; pointer-events:none; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px; box-shadow:0 6px 20px rgba(0,0,0,.35); }
+
+/* Sidebar detail view */
+#app-sidebar h2 { font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--accent); }
+#app-sidebar dl { margin: 0; }
+#app-sidebar dt { font-weight: bold; color: var(--muted); margin-top: 0.3rem; }
+#app-sidebar dd { margin-left: 0; margin-bottom: 0.6rem; }
+.status-badge { display:inline-block; padding:4px 8px; border-radius:6px; font-size:0.8rem; }
+.status-incomplete { background: #333; color: var(--text); }
+.status-in_progress { background: var(--accent); color: #000; }
+.status-complete { background: var(--accent-2); color: #000; }

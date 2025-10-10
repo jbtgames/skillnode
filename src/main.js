@@ -41,11 +41,10 @@ export const App = (() => {
 
     if (window.AppBus && typeof window.AppBus.on === 'function') {
       window.AppBus.on('node:selected', (d) => {
-        if (d) console.log(`[SkillNode] node:selected`, d.id, d.label || '');
+        const sidebar = document.getElementById('app-sidebar');
+        if (sidebar) renderSidebar(sidebar, d);
       });
     }
-
-    console.log("SkillNode: shell initialized");
   }
 
   return { init };
@@ -63,3 +62,4 @@ export const App = (() => {
 
 document.addEventListener("DOMContentLoaded", () => App.init());
 import { mountGraph } from "./components/NodeGraph.js";
+import { renderSidebar } from "./components/Sidebar.js";

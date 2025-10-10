@@ -69,6 +69,7 @@ export function mountGraph(el) {
 
     const nodes = (data.nodes || []).map((d) => ({ ...d }));
     const links = (data.links || []).map((d) => ({ ...d }));
+    const byId = new Map(nodes.map((n) => [n.id, n]));
     const groups = Array.from(new Set(nodes.map((d) => d.group))).filter((v) => v != null);
     const fill = d3.scaleOrdinal(groups, d3.schemeTableau10);
 
@@ -122,7 +123,16 @@ export function mountGraph(el) {
         node.classed('is-selected', false).attr('stroke-width', 2);
         d3.select(ev.currentTarget).classed('is-selected', true).attr('stroke-width', 3);
         if (window.AppBus && typeof window.AppBus.emit === 'function') {
-          window.AppBus.emit('node:selected', d);
+          const ids = Array.from(neighbor.get(d.id) || []);
+          const labels = ids.map((id) => byId.get(id)?.label ?? String(id));
+          window.AppBus.emit('node:selected', {
+            id: d.id,
+            label: d.label,
+            group: d.group,
+            difficulty: d.difficulty,
+            status: d.status,
+            neighbors: labels
+          });
         }
       })
       .call(
