@@ -1,0 +1,261 @@
+# Codex Guidelines — Token Efficiency and Modular Editing
+# Project: SkillNode
+# Author: JBTgames
+# Purpose: Maintain modularity, clarity, and token efficiency when using Codex to build this project.
+
+---
+
+## 1. CORE DIRECTIVE
+
+You are working inside a modular project.  
+Each file represents a single responsibility.  
+You must **only edit the file currently being modified** and assume all other modules exist and function correctly.
+
+You must always follow this guide before performing any work in this repository.
+
+---
+
+## 2. PRIMARY OBJECTIVE
+
+Every Codex edit should:
+- Focus only on one file.
+- Use minimal context.
+- Reduce token consumption.
+- Avoid rewriting or reformatting unrelated code.
+- Preserve modular architecture and isolation.
+
+---
+
+## 3. TOKEN-EFFICIENT PROMPT TEMPLATE
+
+Use this prompt at the start of every session or file edit:
+
+```
+You are editing file: [full path]
+This project follows the Codex Guidelines in /docs/Codex_Guidelines.txt.
+
+CONTEXT:
+Only focus on this file. Do not reference or analyze other files unless explicitly instructed.
+Do not reprint or restate code that has not changed.
+
+TASK:
+[Brief description of what you are building or modifying in this file.]
+
+CONSTRAINTS:
+- Output full file only if it’s newly created.
+- Otherwise output only the modified sections.
+- Keep comments short and functional.
+- Avoid unnecessary explanations.
+- Use placeholders when data or logic is not yet implemented.
+
+END.
+```
+
+---
+
+## 4. FILE ISOLATION RULES
+
+1. Each file must have a clear purpose.
+2. No cross-file imports except through designated main.js or entry points.
+3. When editing, **only modify the active region** of the file.
+4. Use structured markers to define editable areas, e.g.:
+   ```
+   // REGION: Graph logic
+   // REGION: Sidebar UI
+   // REGION: Event bus
+   ```
+5. Do not reformat unrelated code.
+6. Do not comment out or delete functional code unless the task specifically requires it.
+
+---
+
+## 5. COMMUNICATION STYLE
+
+- Replies must be concise, code-focused, and free of filler language.  
+- No introductions, summaries, or reflections.  
+- Use short code comments (// style).  
+- Do not explain changes unless explicitly asked.  
+- Default output = **code only**.  
+
+---
+
+## 6. MISSING CONTEXT POLICY
+
+If you cannot see or access a file’s content, say:
+> “I cannot see the full content of this file. Please provide only the region you want changed.”
+
+Do not assume or fabricate missing logic from other modules.  
+Do not recreate context from memory.  
+
+---
+
+## 7. TOKEN CONSERVATION PRACTICES
+
+- Work one file at a time.  
+- Keep your input prompts under 400–500 tokens.  
+- Avoid listing or summarizing the project structure.  
+- Use **placeholder comments** (e.g., `// TODO: Connect API here`) instead of full boilerplate code.  
+- Skip styling or comments unless directly tied to functionality.  
+- Avoid printing full files repeatedly; use *“Only show updated lines.”* for incremental edits.  
+- When creating new files, define structure first, fill in logic in later steps.  
+
+---
+
+## 8. OUTPUT RULES
+
+- Default output: **code only**.  
+- Do not wrap code in Markdown unless the user requests it.  
+- Include a two-line header for new files:
+  ```
+  // [File Name] — Purpose
+  // Dependencies: [list if relevant]
+  ```
+- No explanations after code unless explicitly requested.  
+- Do not duplicate unchanged content.  
+- Always end with a newline and no commentary.
+
+---
+
+## 9. VALID AND INVALID EXAMPLES
+
+**Bad Prompt:**
+> “Rewrite the entire SkillNode project to include sidebar animations.”
+
+**Good Prompt:**
+> “Edit /src/components/Sidebar.js. Add CSS animation hooks to expand and collapse the sidebar. Do not modify any other sections.”
+
+**Bad Output:**
+> Codex rewrites the full app structure or adds unrelated code.
+
+**Good Output:**
+```
+// REGION: Sidebar toggle
+function toggleSidebar() {
+  const el = document.getElementById('app-sidebar');
+  el.classList.toggle('expanded');
+}
+```
+
+---
+
+## 10. WORKFLOW SEQUENCE
+
+1. Open a single file in VS Code.  
+2. Begin the prompt with:
+   > “Follow /docs/Codex_Guidelines.txt for all output conventions.”  
+3. Provide a short task description (one feature or edit).  
+4. Ask Codex to only output what has changed.  
+5. Save and test locally.  
+6. Commit changes to GitHub with concise message:
+   ```
+   feat(sidebar): add toggle animation
+   fix(progress): adjust localStorage sync
+   ```
+
+---
+
+## 11. CROSS-FILE COORDINATION
+
+When multiple files interact:
+- Modify them separately, one at a time.  
+- End each task with:  
+  > “Stop here. The next edit will occur in [next file].”  
+- Never request Codex to edit multiple files simultaneously.  
+- If logic spans modules, add `// TODO: Implement in [file]` placeholder.
+
+---
+
+## 12. CODING CONVENTIONS
+
+- Use ES Modules (`import` / `export`) where applicable.  
+- Keep functions pure and self-contained.  
+- Use const/let, not var.  
+- Use arrow functions for callbacks.  
+- Follow consistent naming (camelCase for JS, kebab-case for CSS classes).  
+- Prefer declarative markup and semantic HTML5.  
+- Avoid magic numbers or hardcoded strings; define constants when necessary.  
+
+---
+
+## 13. TEST AND DEPLOYMENT PRACTICE
+
+- After each edit, verify:
+  - No console errors.
+  - Page loads without broken references.
+  - Layout renders properly at all screen widths.
+- Deploy to GitHub Pages after completing each phase.
+- Tag each major milestone (`Phase1`, `Phase2`, etc.) in Git.
+- Keep changelog entries short and descriptive.
+
+---
+
+## 14. ENFORCEMENT
+
+If Codex deviates from these rules, remind it explicitly:
+> “Follow /docs/Codex_Guidelines.txt — stay modular and concise.”
+
+If deviations persist, restart the session and reattach this file reference.
+
+---
+
+## 15. REFERENCE SKELETON USAGE
+
+**When to include the reference skeleton:**
+- ✅ Include it only when creating a brand-new file.
+- ✅ Include it when refactoring an entire file structure.
+- ❌ Do not include it for incremental edits or small regional updates.
+
+**Purpose:**  
+The skeleton defines structure once. After the first creation, Codex should only modify sections using region markers.
+
+**Example (good use):**
+> “Create /src/main.js from scratch using this reference skeleton.”
+
+**Example (bad use):**
+> “Here’s the whole file again — just add a console log.”
+
+**Rule:**  
+Once a file exists, describe its structure verbally instead of pasting it. Example:  
+> “This file already includes App.init() and an event bus. Only add logging inside init().”
+
+---
+
+## 16. PHASE WORKFLOW DISCIPLINE
+
+SkillNode development proceeds in phases (Phase1–Phase7).  
+Each phase introduces only one layer of functionality.  
+Never jump ahead of the current phase unless all acceptance criteria are met.
+
+When starting a new phase, clearly announce it in the prompt:  
+> “We are now entering Phase Two — NodeGraph interactivity. Follow the same modular standards.”
+
+This ensures Codex remains aligned with project milestones.
+
+---
+
+## 17. FILE NAMING CONVENTIONS
+
+Follow a consistent and descriptive naming pattern:
+- Components: `PascalCase` (e.g., `NodeGraph.js`, `Sidebar.js`)
+- Utilities/logic: `camelCase` (e.g., `graphGenerator.js`)
+- Stylesheets: lowercase with hyphens (e.g., `dark-theme.css`)
+- Data: lowercase with underscores (e.g., `sample_roadmap.json`)
+
+Avoid spaces and mixed conventions.
+
+---
+
+## 18. PROMPT ETIQUETTE FOR CODEX
+
+When communicating with Codex:
+- Keep prompts short and specific (under 10 lines when possible).  
+- Use **imperative verbs** (e.g., “Add,” “Create,” “Refactor,” “Remove”).  
+- Avoid conversational phrasing (“Can you please...”).  
+- Always include:  
+  > “Follow /docs/Codex_Guidelines.txt for all output conventions.”
+
+This ensures uniform adherence to these rules.
+
+---
+
+# End of Codex Guidelines
