@@ -27,7 +27,7 @@ export async function getSkillRecommendations(nodeLabel) {
     const base = (GROQ_API_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '');
     const url = base + '/chat/completions';
     const body = {
-      model: 'mixtral-8x7b',
+      model: 'llama-3.1-8b-instant',
       messages: [
         { role: 'system', content: 'Output JSON array only.' },
         { role: 'user', content: `Suggest 5 advanced or related skills to ${nodeLabel}, return JSON array of strings.` }

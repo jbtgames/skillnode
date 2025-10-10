@@ -102,3 +102,19 @@ a:hover, a:focus { color: var(--accent-2); text-decoration-color: var(--accent-2
   #app-header, #app-sidebar, #app-canvas, #app-progress, #app-footer { padding: var(--space-2); }
   .graph-root { height: clamp(260px, 46vh, 420px); }
 }
+
+/* Smooth theme transitions */
+body, #app-header, #app-sidebar, #app-canvas, #app-progress, #app-footer, .goal-button {
+  transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+}
+
+/* Light theme overrides */
+body.light-mode {
+  --bg:#f4f4f8;
+  --panel:#ffffff;
+  --text:#111;
+  --muted:#555;
+  --accent:#0077ff;
+  --accent-2:#22b34b;
+  --border:#ccc;
+}

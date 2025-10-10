@@ -13,7 +13,9 @@ const toJson = (s) => {
 };
 
 const corsHeaders = (origin) => {
-  const isLocal = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+  const isLocal = typeof origin === 'string' && (
+    origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')
+  );
   const allow = (ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(origin) || isLocal)
     ? origin
     : ALLOWED_ORIGINS[0];
@@ -84,7 +86,7 @@ async function handleRoadmap(goal, env, CORS) {
   const url = 'https://api.groq.com/openai/v1/chat/completions';
   // If model error persists, try 'llama-3.1-70b-versatile'
   const payload = {
-    model: 'mixtral-8x7b-32768',
+    model: 'llama-3.1-8b-instant',
     messages: [
       { role: 'system', content: 'You are a planner. Output JSON only.' },
       { role: 'user', content: `Generate a learning roadmap for the goal: ${goal}. Return JSON with nodes[] and links[].` }
@@ -120,7 +122,7 @@ async function handleRoadmap(goal, env, CORS) {
 async function handleRecommendations(label, env, CORS) {
   const url = 'https://api.groq.com/openai/v1/chat/completions';
   const payload = {
-    model: 'mixtral-8x7b-32768',
+    model: 'llama-3.1-8b-instant',
     messages: [
       { role: 'system', content: 'Output JSON array only.' },
       { role: 'user', content: `Suggest 5 advanced or related skills to ${label}, return JSON array of strings.` }
