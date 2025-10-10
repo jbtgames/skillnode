@@ -128,7 +128,7 @@ async function handleRecommendations(label, env, CORS) {
       { role: 'user', content: `Suggest 5 advanced or related skills to ${label}, return JSON array of strings.` }
     ],
     temperature: 0,
-    max_tokens: 256
+    max_tokens: 500
   };
   try {
     const r = await fetch(url, {
