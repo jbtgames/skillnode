@@ -3,7 +3,7 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 // REGION: Mount
-export function mountGraph(el) {
+export function mountGraph(el, dataset) {
   if (!el) return;
 
   let width = Math.max(320, Math.floor(el.clientWidth || 640));
@@ -60,11 +60,13 @@ export function mountGraph(el) {
   };
 
   const run = async () => {
-    let data;
-    try { data = await fetchData(); }
-    catch (e) {
-      d3.select(el).append('div').style('color', C_MUTED).style('padding', '8px').text('No data: data/sampleRoadmap.json');
-      return;
+    let data = dataset;
+    if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
+      try { data = await fetchData(); }
+      catch (e) {
+        d3.select(el).append('div').style('color', C_MUTED).style('padding', '8px').text('No data: data/sampleRoadmap.json');
+        return;
+      }
     }
 
     const nodes = (data.nodes || []).map((d) => ({ ...d }));

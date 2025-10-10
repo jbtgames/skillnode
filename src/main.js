@@ -45,6 +45,59 @@ export const App = (() => {
         if (sidebar) renderSidebar(sidebar, d);
       });
     }
+
+    // REGION: Goal input → generate roadmap
+    const headerEl = document.getElementById('app-header');
+    if (headerEl) {
+      const form = document.createElement('form');
+      form.setAttribute('aria-label', 'Generate roadmap');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = 'goal';
+      input.placeholder = 'Target goal (e.g., UI Designer)';
+      input.required = true;
+      const btn = document.createElement('button');
+      btn.type = 'submit';
+      btn.textContent = 'Generate';
+      form.append(input, btn);
+      headerEl.appendChild(form);
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const goal = input.value.trim();
+        if (!goal) return;
+        if (window.AppBus?.emit) window.AppBus.emit('roadmap:requested', goal);
+
+        const host = document.getElementById('app-canvas');
+        if (!host) return;
+        const wrapper = host.querySelector('.graph-container') || (() => {
+          const w = document.createElement('div');
+          w.className = 'graph-container';
+          while (host.firstChild) w.appendChild(host.firstChild);
+          host.appendChild(w);
+          return w;
+        })();
+
+        while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild);
+
+        const data = await requestRoadmap(goal);
+        const originalFetch = window.fetch.bind(window);
+        let served = false;
+        window.fetch = async (inputReq, init) => {
+          const u = typeof inputReq === 'string' ? inputReq : inputReq && inputReq.url;
+          if (!served && u && u.includes('data/sampleRoadmap.json')) {
+            served = true;
+            const res = new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            setTimeout(() => { window.fetch = originalFetch; }, 0);
+            return res;
+          }
+          return originalFetch(inputReq, init);
+        };
+
+        try { mountGraph(wrapper); } catch (err) { console.error(err); }
+        if (window.AppBus?.emit) window.AppBus.emit('roadmap:loaded', { goal, count: data?.nodes?.length || 0 });
+      });
+    }
   }
 
   return { init };
@@ -63,3 +116,4 @@ export const App = (() => {
 document.addEventListener("DOMContentLoaded", () => App.init());
 import { mountGraph } from "./components/NodeGraph.js";
 import { renderSidebar } from "./components/Sidebar.js";
+import { requestRoadmap } from './logic/aiIntegration.js';
