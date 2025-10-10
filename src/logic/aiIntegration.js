@@ -11,27 +11,14 @@ const toJson = (s) => {
 };
 
 export async function requestRoadmap(goal) {
-  const url = (GROQ_API_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '') + '/chat/completions';
-  const body = {
-    model: 'mixtral-8x7b-32768',
-    messages: [
-      { role: 'system', content: 'You are a planner. Output JSON only.' },
-      { role: 'user', content: `Generate a learning roadmap for the goal: ${goal}. Return JSON with nodes[] and links[].` }
-    ],
-    temperature: 0
-  };
-  const res = await fetch(url, {
+  const endpoint = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_ROADMAP_API_URL) || '/api/roadmap';
+  const res = await fetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${GROQ_API_KEY || ''}`
-    },
-    body: JSON.stringify(body)
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ goal })
   });
   if (!res.ok) throw new Error('Roadmap request failed');
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content || '';
-  const parsed = toJson(content);
+  const parsed = await res.json();
   if (!parsed || !Array.isArray(parsed.nodes) || !Array.isArray(parsed.links)) {
     throw new Error('Invalid roadmap format');
   }
