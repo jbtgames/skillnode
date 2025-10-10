@@ -13,7 +13,10 @@ const toJson = (s) => {
 };
 
 const corsHeaders = (origin) => {
-  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const isLocal = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+  const allow = (ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(origin) || isLocal)
+    ? origin
+    : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Methods': 'POST, OPTIONS, GET, HEAD',
