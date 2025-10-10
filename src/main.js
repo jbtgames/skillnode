@@ -85,6 +85,15 @@ export const App = (() => {
         let data;
         try {
           data = await requestRoadmap(goal);
+          if (data && Array.isArray(data.nodes)) {
+            data.nodes = data.nodes.map((n, i) => ({
+              id: n.id ?? n.slug ?? String(n.name ?? n.label ?? i),
+              label: n.label ?? n.name ?? String(n.id ?? `Node ${i+1}`),
+              group: (n.group != null && n.group !== '') ? n.group : '-',
+              difficulty: Number.isFinite(+n.difficulty) ? +n.difficulty : 1,
+              status: n.status ?? 'incomplete'
+            }));
+          }
         } catch (err) {
           const msg = document.createElement('p');
           msg.style.color = 'var(--muted)';

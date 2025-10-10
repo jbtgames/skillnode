@@ -76,7 +76,14 @@ export function mountGraph(el, dataset) {
     const fill = d3.scaleOrdinal(groups, d3.schemeTableau10);
 
     const neighbor = new Map();
-    const nodeKey = (v) => (v && typeof v === 'object') ? v.id : (typeof v === 'number' ? (nodes[v]?.id) : v);
+    const nodeKey = (v) => {
+      if (v && typeof v === 'object') return v.id;
+      if (typeof v === 'number') return nodes[v]?.id;
+      if (typeof v === 'string' && /^\d+$/.test(v)) {
+        const idx = +v; return nodes[idx]?.id ?? v;
+      }
+      return v;
+    };
     const buildNeighbors = () => {
       neighbor.clear();
       nodes.forEach((n) => neighbor.set(n.id, new Set()));
