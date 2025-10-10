@@ -54,21 +54,16 @@ export function mountGraph(el) {
   const idOf = (n) => (n && typeof n === 'object' ? n.id : n);
 
   const fetchData = async () => {
-    const urls = ['/src/data/sampleRoadmap.json', './src/data/sampleRoadmap.json'];
-    for (const url of urls) {
-      try {
-        const r = await fetch(url, { cache: 'no-store' });
-        if (r.ok) return r.json();
-      } catch (_) { /* ignore */ }
-    }
-    throw new Error('sampleRoadmap.json not found');
+    const r = await fetch('./data/sampleRoadmap.json?v=2.0', { cache: 'no-store' });
+    if (!r.ok) throw new Error('sampleRoadmap.json not found');
+    return r.json();
   };
 
   const run = async () => {
     let data;
     try { data = await fetchData(); }
     catch (e) {
-      d3.select(el).append('div').style('color', C_MUTED).style('padding', '8px').text('No data: src/data/sampleRoadmap.json');
+      d3.select(el).append('div').style('color', C_MUTED).style('padding', '8px').text('No data: data/sampleRoadmap.json');
       return;
     }
 
