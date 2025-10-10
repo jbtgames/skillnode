@@ -1,0 +1,122 @@
+{
+  "project": "SkillNode",
+  "version": "Phase 1.1 (Post-deployment Alignment)",
+  "description": "Verified modular project structure for the SkillNode learning roadmap application.",
+  "phases": {
+    "phase1": {
+      "title": "Base App Shell",
+      "status": "complete",
+      "modules": [
+        "index.html",
+        "src/main.js",
+        "src/styles/styles.css",
+        "src/components/Header.js",
+        "src/components/Sidebar.js",
+        "src/components/NodeGraph.js",
+        "src/components/InputForm.js",
+        "src/components/ProgressBar.js",
+        "docs/Codex_Guidelines.txt"
+      ]
+    },
+    "phase2": {
+      "title": "NodeGraph Interactivity (D3.js)",
+      "status": "in_progress",
+      "modules": [
+        "src/components/NodeGraph.js",
+        "src/data/sampleRoadmap.json",
+        "src/styles/graph.css",
+        "src/main.js"
+      ]
+    },
+    "phase3": {
+      "title": "Sidebar Integration and Node Details",
+      "status": "pending",
+      "modules": [
+        "src/components/Sidebar.js",
+        "src/logic/graphParser.js",
+        "src/logic/aiIntegration.js",
+        "src/main.js"
+      ]
+    },
+    "phase4": {
+      "title": "AI Roadmap Generation",
+      "status": "pending",
+      "modules": [
+        "src/logic/aiIntegration.js",
+        "src/data/sampleRoadmap.json"
+      ]
+    },
+    "phase5": {
+      "title": "User Progress and Persistence",
+      "status": "pending",
+      "modules": [
+        "src/logic/progressTracker.js",
+        "src/components/ProgressBar.js",
+        "src/main.js"
+      ]
+    },
+    "phase6": {
+      "title": "UI Polish and Deployment",
+      "status": "pending",
+      "modules": [
+        "src/styles/base.css",
+        "src/styles/components.css",
+        "src/styles/graph.css",
+        "index.html"
+      ]
+    }
+  },
+  "recommended_structure": {
+    "root": [
+      "index.html",
+      ".gitattributes"
+    ],
+    "src": {
+      "main.js": "initialization, placeholders, AppBus event system",
+      "components": [
+        "Header.js",
+        "Sidebar.js",
+        "NodeGraph.js",
+        "InputForm.js",
+        "ProgressBar.js"
+      ],
+      "styles": [
+        "styles.css",
+        "base.css (future)",
+        "graph.css (future)"
+      ],
+      "logic": [
+        "aiIntegration.js (future)",
+        "graphGenerator.js (future)",
+        "progressTracker.js (future)"
+      ],
+      "data": [
+        "sampleRoadmap.json (future)"
+      ]
+    },
+    "docs": [
+      "Codex_Guidelines.txt",
+      "SkillNode_Phase_One_Modular_Build_Guide.md",
+      "SkillNode_Phase_Two_NodeGraph_D3.md",
+      "structure.json"
+    ],
+    "assets": [
+      "logo.svg (optional future)"
+    ]
+  },
+  "integrity_checks": {
+    "paths_case_sensitive": true,
+    "ensure_exists": [
+      "index.html",
+      "src/main.js",
+      "src/styles/styles.css",
+      "docs/Codex_Guidelines.txt"
+    ],
+    "ignore_patterns": [
+      "node_modules/",
+      ".DS_Store"
+    ]
+  },
+  "last_verified": "2025-10-10T00:00:00Z",
+  "verified_by": "Codex + GPT-5 (SkillNode Alignment Pass)"
+}

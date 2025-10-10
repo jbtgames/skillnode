@@ -1,0 +1,40 @@
+{
+  "nodes": [
+    { "id": "FND-HTML", "label": "HTML Basics", "group": "foundation", "difficulty": 1, "status": "complete" },
+    { "id": "FND-CSS", "label": "CSS Basics", "group": "foundation", "difficulty": 1, "status": "in_progress" },
+    { "id": "FND-JS", "label": "JavaScript Fundamentals", "group": "foundation", "difficulty": 2, "status": "in_progress" },
+    { "id": "FND-GIT", "label": "Git & CLI", "group": "foundation", "difficulty": 1, "status": "complete" },
+
+    { "id": "FE-TS", "label": "TypeScript Basics", "group": "frontend", "difficulty": 2, "status": "incomplete" },
+    { "id": "FE-REACT", "label": "React Fundamentals", "group": "frontend", "difficulty": 3, "status": "incomplete" },
+    { "id": "FE-STATE", "label": "State Management", "group": "frontend", "difficulty": 3, "status": "incomplete" },
+    { "id": "FE-TOOL", "label": "Build Tooling", "group": "frontend", "difficulty": 2, "status": "in_progress" },
+
+    { "id": "BE-NODE", "label": "Node.js Basics", "group": "backend", "difficulty": 2, "status": "in_progress" },
+    { "id": "BE-API", "label": "REST API Design", "group": "backend", "difficulty": 3, "status": "incomplete" },
+    { "id": "BE-DB", "label": "Databases", "group": "backend", "difficulty": 3, "status": "incomplete" },
+    { "id": "BE-AUTH", "label": "Authentication", "group": "backend", "difficulty": 3, "status": "incomplete" }
+  ],
+  "links": [
+    { "source": "FND-HTML", "target": "FND-CSS", "type": "prereq" },
+    { "source": "FND-HTML", "target": "FND-JS", "type": "prereq" },
+    { "source": "FND-CSS", "target": "FND-JS", "type": "related" },
+
+    { "source": "FND-JS", "target": "FE-TS", "type": "prereq" },
+    { "source": "FND-JS", "target": "FE-REACT", "type": "prereq" },
+    { "source": "FE-TS", "target": "FE-REACT", "type": "related" },
+    { "source": "FE-REACT", "target": "FE-STATE", "type": "prereq" },
+    { "source": "FND-JS", "target": "FE-TOOL", "type": "related" },
+    { "source": "FE-TOOL", "target": "FE-REACT", "type": "related" },
+
+    { "source": "FND-JS", "target": "BE-NODE", "type": "prereq" },
+    { "source": "BE-NODE", "target": "BE-API", "type": "prereq" },
+    { "source": "BE-NODE", "target": "BE-DB", "type": "prereq" },
+    { "source": "BE-API", "target": "BE-AUTH", "type": "prereq" },
+    { "source": "BE-DB", "target": "BE-API", "type": "related" },
+    { "source": "FE-REACT", "target": "BE-API", "type": "related" },
+
+    { "source": "FND-GIT", "target": "FE-TOOL", "type": "prereq" },
+    { "source": "FND-GIT", "target": "BE-NODE", "type": "prereq" }
+  ]
+}

@@ -29,6 +29,22 @@ export const App = (() => {
   function init(){
     ensureContainers();
     renderPlaceholders();
+    // REGION: Graph bootstrap
+    const host = document.getElementById("app-canvas");
+    if (host) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'graph-container';
+      while (host.firstChild) wrapper.appendChild(host.firstChild);
+      host.appendChild(wrapper);
+      try { mountGraph(wrapper); } catch (e) { console.error(e); }
+    }
+
+    if (window.AppBus && typeof window.AppBus.on === 'function') {
+      window.AppBus.on('node:selected', (d) => {
+        if (d) console.log(`[SkillNode] node:selected`, d.id, d.label || '');
+      });
+    }
+
     console.log("SkillNode: shell initialized");
   }
 
@@ -46,3 +62,4 @@ export const App = (() => {
 })();
 
 document.addEventListener("DOMContentLoaded", () => App.init());
+import { mountGraph } from "./components/NodeGraph.js";

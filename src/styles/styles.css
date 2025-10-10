@@ -46,3 +46,12 @@ a:focus,button:focus,[role="button"]:focus,[tabindex]:focus{
 .container{ max-width:1280px; margin:0 auto; }
 .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
 .divider{ height:1px; background:var(--border); margin:var(--space-3) 0; }
+
+/* Graph-specific styles */
+.graph-container { position: relative; }
+.graph-root { width: 100%; height: 520px; display:block; border-radius: var(--radius); }
+.link { stroke: var(--border); stroke-width: 1.2; opacity: .7; }
+.node { cursor: pointer; stroke: #000; stroke-width: 1.2; }
+.node.is-hovered { stroke: var(--accent); stroke-width: 2; }
+.node.is-selected { stroke: var(--accent-2); stroke-width: 2.5; }
+.tooltip { position:absolute; pointer-events:none; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px; box-shadow:0 6px 20px rgba(0,0,0,.35); }
