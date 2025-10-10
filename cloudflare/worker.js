@@ -1,0 +1,109 @@
+// Cloudflare Worker: Roadmap API proxy (GitHub Pages CORS)
+// Allowed UI origin(s): update as needed
+
+const ALLOWED_ORIGINS = [
+  'https://jbtgames.github.io'
+];
+
+const toJson = (s) => {
+  try { return JSON.parse(s); } catch {}
+  const m = String(s).match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return null;
+};
+
+const corsHeaders = (origin) => {
+  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS, GET, HEAD',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin'
+  };
+};
+
+const json = (body, status, headers) => new Response(
+  JSON.stringify(body),
+  { status, headers: { 'Content-Type': 'application/json', ...headers } }
+);
+
+export default {
+  async fetch(request, env) {
+    const origin = request.headers.get('Origin') || '';
+    const CORS = corsHeaders(origin);
+
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS });
+    }
+
+    // Friendly GET/HEAD handlers to avoid noisy 405s when visiting the Worker URL
+    if (request.method === 'GET' || request.method === 'HEAD') {
+      const { pathname } = new URL(request.url);
+      if (pathname === '/favicon.ico') {
+        return new Response(null, { status: 204, headers: { ...CORS, 'Content-Type': 'image/x-icon' } });
+      }
+      // Support simple GET testing: /?goal=UI%20Designer
+      const goal = new URL(request.url).searchParams.get('goal');
+      if (request.method === 'GET' && goal) {
+        return handleRoadmap(goal, env, CORS);
+      }
+      if (request.method === 'HEAD') {
+        return new Response(null, { status: 204, headers: CORS });
+      }
+      return json({ ok: true, service: 'SkillNode Roadmap Worker' }, 200, CORS);
+    }
+
+    if (request.method !== 'POST') {
+      return json({ error: 'Method Not Allowed' }, 405, CORS);
+    }
+
+    if (!env.GROQ_API_KEY) {
+      return json({ error: 'Server not configured' }, 500, CORS);
+    }
+
+    let goal = '';
+    try { const b = await request.json(); goal = (b?.goal || '').trim(); } catch {}
+    if (!goal) return json({ error: 'Missing goal' }, 400, CORS);
+
+    return handleRoadmap(goal, env, CORS);
+  }
+}
+
+async function handleRoadmap(goal, env, CORS) {
+  const url = 'https://api.groq.com/openai/v1/chat/completions';
+  // If model error persists, try 'llama-3.1-70b-versatile'
+  const payload = {
+    model: 'mixtral-8x7b-32768',
+    messages: [
+      { role: 'system', content: 'You are a planner. Output JSON only.' },
+      { role: 'user', content: `Generate a learning roadmap for the goal: ${goal}. Return JSON with nodes[] and links[].` }
+    ],
+    temperature: 0,
+    max_tokens: 1024
+  };
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const text = await r.text();
+    if (!r.ok) {
+      return json({ error: 'Upstream error', status: r.status, body: text }, r.status, CORS);
+    }
+    const data = JSON.parse(text);
+    const content = data?.choices?.[0]?.message?.content || '';
+    const parsed = toJson(content);
+    if (!parsed || !Array.isArray(parsed.nodes) || !Array.isArray(parsed.links)) {
+      return json({ error: 'Invalid roadmap format', raw: content }, 502, CORS);
+    }
+    return json(parsed, 200, CORS);
+  } catch (e) {
+    return json({ error: 'Request failed' }, 500, CORS);
+  }
+}

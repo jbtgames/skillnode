@@ -76,15 +76,18 @@ export function mountGraph(el, dataset) {
     const fill = d3.scaleOrdinal(groups, d3.schemeTableau10);
 
     const neighbor = new Map();
-    nodes.forEach((n) => neighbor.set(n.id, new Set()));
-    links.forEach((l) => {
-      const a = idOf(l.source);
-      const b = idOf(l.target);
-      if (!neighbor.has(a)) neighbor.set(a, new Set());
-      if (!neighbor.has(b)) neighbor.set(b, new Set());
-      neighbor.get(a).add(b);
-      neighbor.get(b).add(a);
-    });
+    const nodeKey = (v) => (v && typeof v === 'object') ? v.id : (typeof v === 'number' ? (nodes[v]?.id) : v);
+    const buildNeighbors = () => {
+      neighbor.clear();
+      nodes.forEach((n) => neighbor.set(n.id, new Set()));
+      links.forEach((l) => {
+        const a = nodeKey(l.source);
+        const b = nodeKey(l.target);
+        if (!a || !b) return;
+        neighbor.get(a)?.add(b);
+        neighbor.get(b)?.add(a);
+      });
+    };
 
     const sim = d3.forceSimulation(nodes)
       .force('link', d3.forceLink(links).id((d) => d.id).distance(48).strength(0.2))
@@ -95,6 +98,7 @@ export function mountGraph(el, dataset) {
     const link = linkG.selectAll('line')
       .data(links)
       .join('line')
+      .attr('class', 'link')
       .attr('stroke', C_BORDER)
       .attr('stroke-opacity', 0.5)
       .attr('stroke-width', 1.5);
@@ -102,6 +106,7 @@ export function mountGraph(el, dataset) {
     const node = nodeG.selectAll('circle')
       .data(nodes)
       .join('circle')
+      .attr('class', 'node')
       .attr('r', (d) => radius(d))
       .attr('fill', (d) => fill(d.group))
       .attr('stroke', (d) => statusStroke(d.status))
@@ -110,7 +115,10 @@ export function mountGraph(el, dataset) {
       .on('mouseover', (ev, d) => {
         tooltip.style('opacity', 1).html(`<strong>${d.label || d.id}</strong><br/>Group: ${d.group ?? ''}`);
         node.attr('opacity', (n) => (n.id === d.id || neighbor.get(d.id)?.has(n.id) ? 1 : 0.25));
-        link.attr('stroke-opacity', (l) => (idOf(l.source) === d.id || idOf(l.target) === d.id ? 0.9 : 0.15));
+        link.attr('stroke-opacity', (l) => {
+          const a = nodeKey(l.source); const b = nodeKey(l.target);
+          return (a === d.id || b === d.id) ? 0.9 : 0.15;
+        });
       })
       .on('mousemove', (ev) => {
         const [x, y] = d3.pointer(ev, document.body);
@@ -153,6 +161,9 @@ export function mountGraph(el, dataset) {
             d.fx = null; d.fy = null;
           })
       );
+
+    // Resolve neighbor map after link force initializes source/target
+    buildNeighbors();
 
     sim.on('tick', () => {
       link

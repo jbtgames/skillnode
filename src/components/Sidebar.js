@@ -38,15 +38,15 @@ export function renderSidebar(el, data) {
     dl.append(dt, dd);
   };
 
-  const group = data.group ?? '—';
-  const diff = Number.isFinite(+data.difficulty) ? `Level ${+data.difficulty}` : (data.difficulty ?? '—');
+  const group = (data.group != null && data.group !== '') ? data.group : '-';
+  const diff = Number.isFinite(+data.difficulty) ? `Level ${+data.difficulty}` : (data.difficulty ?? '-');
   const status = (data.status || 'incomplete');
 
   addRow('Group', String(group));
   addRow('Difficulty', String(diff));
 
   const badge = document.createElement('span');
-  badge.className = `badge badge--${status}`;
+  badge.className = `status-badge status-${status}`;
   badge.textContent = String(status).replace('_', ' ');
   addRowEl('Status', badge);
 
@@ -71,3 +71,4 @@ export function renderSidebar(el, data) {
   container.appendChild(section);
   el.appendChild(container);
 }
+

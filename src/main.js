@@ -56,9 +56,11 @@ export const App = (() => {
       input.name = 'goal';
       input.placeholder = 'Target goal (e.g., UI Designer)';
       input.required = true;
+      input.className = 'goal-input';
       const btn = document.createElement('button');
       btn.type = 'submit';
       btn.textContent = 'Generate';
+      btn.className = 'goal-button';
       form.append(input, btn);
       headerEl.appendChild(form);
 
@@ -80,21 +82,18 @@ export const App = (() => {
 
         while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild);
 
-        const data = await requestRoadmap(goal);
-        const originalFetch = window.fetch.bind(window);
-        let served = false;
-        window.fetch = async (inputReq, init) => {
-          const u = typeof inputReq === 'string' ? inputReq : inputReq && inputReq.url;
-          if (!served && u && u.includes('data/sampleRoadmap.json')) {
-            served = true;
-            const res = new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
-            setTimeout(() => { window.fetch = originalFetch; }, 0);
-            return res;
-          }
-          return originalFetch(inputReq, init);
-        };
+        let data;
+        try {
+          data = await requestRoadmap(goal);
+        } catch (err) {
+          const msg = document.createElement('p');
+          msg.style.color = 'var(--muted)';
+          msg.textContent = 'Unable to generate roadmap.';
+          wrapper.appendChild(msg);
+          return;
+        }
 
-        try { mountGraph(wrapper); } catch (err) { console.error(err); }
+        try { mountGraph(wrapper, data); } catch (err) { console.error(err); }
         if (window.AppBus?.emit) window.AppBus.emit('roadmap:loaded', { goal, count: data?.nodes?.length || 0 });
       });
     }
