@@ -1,0 +1,39 @@
+{
+  "goal": "Data Analyst",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's in Statistics or Data Science",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Junior Data Analyst",
+      "type": "work"
+    },
+    {
+      "id": 3,
+      "label": "Data Analyst",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 4,
+        "label": "Google Data Analytics Certificate",
+        "type": "cert"
+      },
+      {
+        "id": 5,
+        "label": "Freelance Analysis Projects",
+        "type": "work"
+      },
+      {
+        "id": 3,
+        "label": "Data Analyst",
+        "type": "goal"
+      }
+    ]
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "goal": "Lawyer",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's Degree",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Law School (JD)",
+      "type": "education"
+    },
+    {
+      "id": 3,
+      "label": "Bar Exam",
+      "type": "cert"
+    },
+    {
+      "id": 4,
+      "label": "Associate Lawyer",
+      "type": "work"
+    },
+    {
+      "id": 5,
+      "label": "Lawyer",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 6,
+        "label": "Paralegal",
+        "type": "work"
+      },
+      {
+        "id": 7,
+        "label": "Law School (Later)",
+        "type": "education"
+      },
+      {
+        "id": 5,
+        "label": "Lawyer",
+        "type": "goal"
+      }
+    ]
+  ]
+}

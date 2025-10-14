@@ -1,0 +1,44 @@
+{
+  "goal": "Teacher",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's in Education",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Teaching Certification",
+      "type": "cert"
+    },
+    {
+      "id": 3,
+      "label": "Classroom Teaching",
+      "type": "work"
+    },
+    {
+      "id": 4,
+      "label": "Teacher",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 5,
+        "label": "Industry Expert",
+        "type": "work"
+      },
+      {
+        "id": 6,
+        "label": "Adjunct Instructor",
+        "type": "work"
+      },
+      {
+        "id": 4,
+        "label": "Teacher",
+        "type": "goal"
+      }
+    ]
+  ]
+}

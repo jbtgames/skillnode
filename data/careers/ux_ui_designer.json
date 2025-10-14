@@ -1,0 +1,39 @@
+{
+  "goal": "UX/UI Designer",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's in Design or HCI",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "UX Internship",
+      "type": "work"
+    },
+    {
+      "id": 3,
+      "label": "UX/UI Designer",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 4,
+        "label": "Self-Taught Figma and Usability Testing",
+        "type": "education"
+      },
+      {
+        "id": 5,
+        "label": "Freelance Design Work",
+        "type": "work"
+      },
+      {
+        "id": 3,
+        "label": "UX/UI Designer",
+        "type": "goal"
+      }
+    ]
+  ]
+}

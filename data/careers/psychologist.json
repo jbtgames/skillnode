@@ -1,0 +1,44 @@
+{
+  "goal": "Psychologist",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's in Psychology",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Master's or PhD",
+      "type": "education"
+    },
+    {
+      "id": 3,
+      "label": "Clinical Practice",
+      "type": "work"
+    },
+    {
+      "id": 4,
+      "label": "Psychologist",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 5,
+        "label": "Counseling Certificate",
+        "type": "cert"
+      },
+      {
+        "id": 6,
+        "label": "Work as Counselor",
+        "type": "work"
+      },
+      {
+        "id": 4,
+        "label": "Psychologist",
+        "type": "goal"
+      }
+    ]
+  ]
+}

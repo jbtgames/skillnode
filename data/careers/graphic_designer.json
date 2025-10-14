@@ -1,0 +1,44 @@
+{
+  "goal": "Graphic Designer",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's in Graphic Design",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Design Internship",
+      "type": "work"
+    },
+    {
+      "id": 3,
+      "label": "Junior Designer",
+      "type": "work"
+    },
+    {
+      "id": 4,
+      "label": "Graphic Designer",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 5,
+        "label": "Self-Taught via Adobe Suite",
+        "type": "education"
+      },
+      {
+        "id": 6,
+        "label": "Freelancing Portfolio",
+        "type": "work"
+      },
+      {
+        "id": 4,
+        "label": "Graphic Designer",
+        "type": "goal"
+      }
+    ]
+  ]
+}

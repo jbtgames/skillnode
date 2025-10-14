@@ -68,14 +68,22 @@ export default {
       return json({ error: 'Server not configured' }, 500, CORS);
     }
 
-    let goal = '', recommendationsFor = '';
+    let goal = '', recommendationsFor = '', pathwaysFor = '', progressionsFor = '';
     try {
       const b = await request.json();
       goal = (b?.goal || '').trim();
       recommendationsFor = (b?.recommendationsFor || '').trim();
+      pathwaysFor = (b?.pathwaysFor || '').trim();
+      progressionsFor = (b?.progressionsFor || '').trim();
     } catch {}
     if (recommendationsFor) {
       return handleRecommendations(recommendationsFor, env, CORS);
+    }
+    if (pathwaysFor) {
+      return handlePathways(pathwaysFor, env, CORS);
+    }
+    if (progressionsFor) {
+      return handleProgressions(progressionsFor, env, CORS);
     }
     if (!goal) return json({ error: 'Missing goal' }, 400, CORS);
     return handleRoadmap(goal, env, CORS);
@@ -149,4 +157,48 @@ async function handleRecommendations(label, env, CORS) {
   } catch {
     return json([], 200, CORS);
   }
+}
+
+async function handlePathways(label, env, CORS) {
+  const url = 'https://api.groq.com/openai/v1/chat/completions';
+  const payload = {
+    model: 'llama-3.1-8b-instant',
+    messages: [
+      { role: 'system', content: 'Output JSON only.' },
+      { role: 'user', content: 'Generate one primary linear career path and optional alternate branches leading to ' + label + '. Return JSON: {goal, primary[], branches[][]}. Each node includes {id, label, type (education|work|cert|goal), description, difficulty, stage}.' }
+    ],
+    temperature: 0,
+    max_tokens: 1400
+  };
+  try {
+    const r = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': 'Bearer ' + env.GROQ_API_KEY }, body: JSON.stringify(payload) });
+    const text = await r.text();
+    if (!r.ok) return json({ error:'Upstream error', status:r.status, body:text }, r.status, CORS);
+    let obj = {};
+    try { const data = JSON.parse(text); obj = toJson(data?.choices?.[0]?.message?.content || '') || {}; } catch {}
+    if (!obj || (!Array.isArray(obj.primary) && !Array.isArray(obj.branches))) obj = { goal: label, primary: [], branches: [] };
+    return json(obj, 200, CORS);
+  } catch { return json({ goal: label, primary: [], branches: [] }, 200, CORS); }
+}
+
+async function handleProgressions(label, env, CORS) {
+  const url = 'https://api.groq.com/openai/v1/chat/completions';
+  const payload = {
+    model: 'llama-3.1-8b-instant',
+    messages: [
+      { role: 'system', content: 'Output JSON array only.' },
+      { role: 'user', content: 'Given the role ' + label + ', suggest up to 5 realistic next career positions. Return JSON array of strings.' }
+    ],
+    temperature: 0,
+    max_tokens: 256
+  };
+  try {
+    const r = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': 'Bearer ' + env.GROQ_API_KEY }, body: JSON.stringify(payload) });
+    const text = await r.text();
+    if (!r.ok) return json([], 200, CORS);
+    let out = [];
+    try { const data = JSON.parse(text); out = toJson(data?.choices?.[0]?.message?.content || '') || []; } catch {}
+    if (!Array.isArray(out)) out = [];
+    return json(out, 200, CORS);
+  } catch { return json([], 200, CORS); }
 }

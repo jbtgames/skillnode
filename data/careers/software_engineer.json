@@ -1,0 +1,44 @@
+{
+  "goal": "Software Engineer",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's in Software Engineering",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Internship at Tech Company",
+      "type": "work"
+    },
+    {
+      "id": 3,
+      "label": "Junior Software Engineer",
+      "type": "work"
+    },
+    {
+      "id": 4,
+      "label": "Software Engineer",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 5,
+        "label": "Coding Bootcamp",
+        "type": "education"
+      },
+      {
+        "id": 6,
+        "label": "Open Source Projects",
+        "type": "work"
+      },
+      {
+        "id": 4,
+        "label": "Software Engineer",
+        "type": "goal"
+      }
+    ]
+  ]
+}

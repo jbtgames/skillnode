@@ -1,0 +1,44 @@
+{
+  "goal": "Nurse",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor of Science in Nursing",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Registered Nurse License",
+      "type": "cert"
+    },
+    {
+      "id": 3,
+      "label": "Hospital Experience",
+      "type": "work"
+    },
+    {
+      "id": 4,
+      "label": "Nurse",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 5,
+        "label": "Practical Nursing (LPN)",
+        "type": "education"
+      },
+      {
+        "id": 6,
+        "label": "Bridge to RN",
+        "type": "education"
+      },
+      {
+        "id": 4,
+        "label": "Nurse",
+        "type": "goal"
+      }
+    ]
+  ]
+}

@@ -27,6 +27,37 @@ export const App = (() => {
   }
 
   function init(){
+    let currentData = null;
+    let searchGoal = '';
+    let viewMode = (()=>{ try { return localStorage.getItem('viewMode') || 'branch'; } catch { return 'branch'; } })();
+    const applyMode = (data, mode) => {
+      if (!data) return null;
+      if (Array.isArray(data.pathways)) {
+          if (mode === 'linear') return { pathways: [ data.pathways[0] || { nodes: [] } ], goal: data.goal };
+          if (mode === 'requirements') {
+            const allNodes = new Map();
+            data.pathways.forEach((p, ri)=> (p.nodes||[]).forEach((n,i)=> allNodes.set(n.id||`${ri}-${i}`, n)));
+            const ns = Array.from(allNodes.values());
+            const ls = []; // no explicit prereqs in pathways; show only steps of first route
+            const steps = (data.pathways[0]?.nodes)||[];
+            for (let i=1;i<steps.length;i++) ls.push({ source: steps[i-1].id||`0-${i-1}`, target: steps[i].id||`0-${i}`, type:'prereq' });
+            return { nodes: ns, links: ls, goal: data.goal };
+          }
+          return { pathways: data.pathways, goal: data.goal };
+      }
+      const nodes = Array.isArray(data.nodes)? data.nodes : [];
+      const links = Array.isArray(data.links)? data.links : [];
+      if (mode === 'linear') {
+          const keep = new Set(['path','prereq']);
+          return { nodes, links: links.filter(l=> keep.has(String(l.type||''))), goal: data.goal };
+      }
+      if (mode === 'requirements') {
+          const fl = links.filter(l=> String(l.type||'')==='prereq');
+          const used = new Set(); fl.forEach(l=>{ used.add(String(l.source)); used.add(String(l.target)); });
+          return { nodes: nodes.filter(n=> used.has(String(n.id))), links: fl, goal: data.goal };
+      }
+      return { nodes, links, goal: data.goal };
+    };
     try {
       // REGION: Theme setup
       const THEME_KEY = 'theme';
@@ -63,7 +94,7 @@ export const App = (() => {
         host.appendChild(wrapper);
         const loadGraph = (() => { let p; return () => (p ||= import('./components/NodeGraph.js')); })();
         requestAnimationFrame(() => {
-          loadGraph().then(mod => { try { mod.mountGraph(wrapper); } catch {} }).catch(() => {});
+          loadGraph().then(mod => { try { mod.mountGraph(wrapper, applyMode(currentData, viewMode) || undefined); } catch {} }).catch(() => {});
         });
       }
 
@@ -102,9 +133,42 @@ export const App = (() => {
       btn.className = 'goal-button';
       const actions = document.createElement('div');
       actions.style.display = 'flex'; actions.style.gap = '8px'; actions.style.flexWrap = 'wrap';
-      actions.append(toggle, form);
+      // View mode select
+      const modeSel = document.createElement('select');
+      modeSel.innerHTML = '<option value="linear">Linear Path</option><option value="branch">Branching Pathways</option><option value="requirements">Requirements Only</option>';
+      modeSel.value = viewMode;
+      modeSel.className = 'goal-button';
+      // Branches toggle
+      const branchesBtn = document.createElement('button');
+      branchesBtn.id = 'toggle-branches';
+      branchesBtn.type = 'button';
+      branchesBtn.className = 'goal-button';
+      const getShowBranches = () => { try { return localStorage.getItem('showBranches') === 'true'; } catch { return false; } };
+      const setShowBranches = (v) => { try { localStorage.setItem('showBranches', v ? 'true' : 'false'); } catch {} };
+      const updateBranchesLabel = (v) => { branchesBtn.textContent = v ? 'Hide Alternate Routes' : 'Show Alternate Routes'; };
+      let showBranches = getShowBranches();
+      updateBranchesLabel(showBranches);
+      branchesBtn.addEventListener('click', () => {
+        showBranches = !showBranches;
+        setShowBranches(showBranches);
+        updateBranchesLabel(showBranches);
+        if (window.AppBus?.emit) window.AppBus.emit('branches:toggle', showBranches);
+      });
+      actions.append(toggle, modeSel, branchesBtn, form);
       form.append(input, btn);
       headerEl.appendChild(actions);
+
+      modeSel.addEventListener('change', async () => {
+        viewMode = modeSel.value;
+        try { localStorage.setItem('viewMode', viewMode); } catch {}
+        if (window.AppBus?.emit) window.AppBus.emit('mode:changed', viewMode);
+        const host = document.getElementById('app-canvas'); if (!host) return;
+        const wrapper = host.querySelector('.graph-container'); if (!wrapper) return;
+        while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild);
+        const loadGraph = (() => { let p; return () => (p ||= import('./components/NodeGraph.js')); })();
+        const data = applyMode(currentData, viewMode);
+        requestAnimationFrame(()=>{ loadGraph().then(mod=>{ try { mod.mountGraph(wrapper, data || undefined); } catch {} }).catch(()=>{}); });
+      });
 
       toggle.addEventListener('click', () => {
         const to = document.body.classList.contains('theme-light') ? 'dark' : 'light';
@@ -124,6 +188,7 @@ export const App = (() => {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const goal = input.value.trim();
+        searchGoal = goal;
         if (!goal) return;
         if (window.AppBus?.emit) window.AppBus.emit('roadmap:requested', goal);
 
@@ -172,6 +237,8 @@ export const App = (() => {
             type: l.type ?? 'related'
           }));
           data = { nodes, links };
+          data.goal = searchGoal;
+          currentData = data;
         } catch (err) {
           loading.remove();
           input.disabled = false; btn.disabled = false;
@@ -189,7 +256,7 @@ export const App = (() => {
         // Lazy-load graph module and render on next frame
         const loadGraph = (() => { let p; return () => (p ||= import('./components/NodeGraph.js')); })();
         requestAnimationFrame(() => {
-          loadGraph().then(mod => { try { mod.mountGraph(wrapper, data); } catch {} }).catch(() => {});
+          loadGraph().then(mod => { try { mod.mountGraph(wrapper, applyMode(currentData, viewMode)); } catch {} }).catch(() => {});
         });
         if (window.AppBus?.emit) window.AppBus.emit('roadmap:loaded', { goal, count: data?.nodes?.length || 0 });
       });

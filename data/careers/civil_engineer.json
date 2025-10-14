@@ -1,0 +1,39 @@
+{
+  "goal": "Civil Engineer",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Bachelor's in Civil Engineering",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Engineer-in-Training",
+      "type": "work"
+    },
+    {
+      "id": 3,
+      "label": "Civil Engineer",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 4,
+        "label": "Surveyor or Drafting Technician",
+        "type": "work"
+      },
+      {
+        "id": 5,
+        "label": "Engineering Diploma",
+        "type": "education"
+      },
+      {
+        "id": 3,
+        "label": "Civil Engineer",
+        "type": "goal"
+      }
+    ]
+  ]
+}

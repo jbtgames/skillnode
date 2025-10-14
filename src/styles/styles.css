@@ -118,3 +118,17 @@ body.light-mode {
   --accent-2:#22b34b;
   --border:#ccc;
 }
+
+/* Node category colors */
+.node-education { fill: #5aa6ff; }
+.node-work { fill: #22b34b; }
+.node-cert { fill: #f9c74f; }
+.node-goal { fill: url(#goal-gradient); stroke: #fff; stroke-width: 2; }
+
+/* Hierarchical visibility and branch styling */
+.node-primary { opacity: 1; transition: opacity .2s ease, stroke-dasharray .2s ease; }
+.node-branch { opacity: 0.8; stroke-dasharray: 3 2; transition: opacity .2s ease, stroke-dasharray .2s ease; }
+.node-hidden { display: none; }
+
+.link-branch { stroke-opacity: 0.6; stroke-dasharray: 4 3; transition: stroke-opacity .2s ease, stroke-dasharray .2s ease; }
+.link-primary { stroke-width: 2; transition: stroke-width .2s ease; }

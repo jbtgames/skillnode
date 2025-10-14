@@ -1,0 +1,44 @@
+{
+  "goal": "Web Developer",
+  "primary": [
+    {
+      "id": 1,
+      "label": "Computer Science Degree",
+      "type": "education"
+    },
+    {
+      "id": 2,
+      "label": "Internship",
+      "type": "work"
+    },
+    {
+      "id": 3,
+      "label": "Junior Developer",
+      "type": "work"
+    },
+    {
+      "id": 4,
+      "label": "Web Developer",
+      "type": "goal"
+    }
+  ],
+  "branches": [
+    [
+      {
+        "id": 5,
+        "label": "Coding Bootcamp",
+        "type": "education"
+      },
+      {
+        "id": 6,
+        "label": "Freelance Projects",
+        "type": "work"
+      },
+      {
+        "id": 4,
+        "label": "Web Developer",
+        "type": "goal"
+      }
+    ]
+  ]
+}
